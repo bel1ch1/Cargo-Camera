@@ -14,14 +14,20 @@ with open('cameraMatrix.pkl', 'rb') as g:
 # Константы
 MARKER_SIZE_M = 0.165 # Размер маркера
 ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50) # набор маркеров
-
+FRAME_SHAPE = [420, 640]
 
 # Параметры
 arucoParam = cv2.aruco.DetectorParameters()
 
 
+def center_coords(shape = FRAME_SHAPE):
+    center_X = FRAME_SHAPE[0] / 2
+    center_Y = FRAME_SHAPE[1] / 2
+    return [center_X, center_Y]
+
 # Поиск позиции
-def pose_esitmation(img, arucoDict):
+def pose_esitmation(img: cv2.MatLike, arucoDict, **center):
+    """returns coordinates and distance to the object"""
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -38,11 +44,11 @@ def pose_esitmation(img, arucoDict):
         distance_to_marker = np.linalg.norm(tvec)
 
         # координаты и дистанция
-        c1 = corners[0][0][0]
-        c2 = corners[0][0][1]
-        c3 = corners[0][0][2]
-        c4 = corners[0][0][3]
-        d = distance_to_marker#[0][0]
+        c1 = corners[0][0][0] - center[0]
+        c2 = corners[0][0][1] - center[0]
+        c3 = corners[0][0][2] - center[0]
+        c4 = corners[0][0][3] - center[0]
+        d = distance_to_marker
 
         # Вывод в консоль
         print(c1, c2, c3, c4, d)
@@ -53,15 +59,19 @@ def pose_esitmation(img, arucoDict):
 # захват видео с камеры и обработка
 cap = cv2.VideoCapture(0)
 while True:
+
     success, frame = cap.read()
 
     if not success:
         break
 
-    # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT)
+    # Получаем центр координат
+    center = center_coords()
 
-    # Вывод видел
+    # Вывод координат и дистанции
+    output=pose_esitmation(frame, ARUCO_DICT, center)
+
+    # Вывод кадров
     cv2.imshow(output)
 
     # Остановка
