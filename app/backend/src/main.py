@@ -22,18 +22,19 @@ arucoParam = cv2.aruco.DetectorParameters()
 
 # Поиск позиции
 def pose_esitmation(img, arucoDict):
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
     # Ищем маркеры
     corners, _, _ = cv2.aruco.detectMarkers(gray, arucoDict, parameters=arucoParam)
+
     # если нашли
     if corners:
+
         # Определяем сдвиг
         _ , tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, MARKER_SIZE_M, cam_mat, dist_coef)
-        # Определяем дистанцию до маркера
-        # distance_to_marker = np.sqrt(
-        #                 tvec ** 2 + tvec ** 2 + tvec ** 2
-        #             )
 
+        # Определяем дистанцию до маркера
         distance_to_marker = np.linalg.norm(tvec)
 
         # координаты и дистанция
@@ -42,8 +43,10 @@ def pose_esitmation(img, arucoDict):
         c3 = corners[0][0][2]
         c4 = corners[0][0][3]
         d = distance_to_marker#[0][0]
+
         # Вывод в консоль
         print(c1, c2, c3, c4, d)
+        # Возврат значений
         return f"1 {c1[:1]},\n2 {c2[:1]},\n3 {c3[:1]},\n4 {c4[:1]},\ndistance {d}"
 
 
@@ -51,15 +54,17 @@ def pose_esitmation(img, arucoDict):
 cap = cv2.VideoCapture(0)
 while True:
     success, frame = cap.read()
+
     if not success:
         break
 
     # Вывод координат и дистанции
     output=pose_esitmation(frame, ARUCO_DICT)
 
+    # Вывод видел
     cv2.imshow(output)
 
-    # Остановка вывода
+    # Остановка
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
