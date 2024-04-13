@@ -57,7 +57,7 @@ def pose_esitmation(img, arucoDict, centerX, centerY):
         # Вывод в консоль
         print(f"{c1X, c1Y}, {c2X, c2Y}, {c3X, c3Y}, {c4X, c4Y}, \ndistance: {d}")
         # Возврат значений
-        #return f"1 {c1X[:1]},\n2 {c2X[:1]},\n3 {c3X[:1]},\n4 {c4X[:1]},\ndistance {d}"
+        return f"1:{c1X, c1Y}, 2:{c2X, c2Y}, 3:{c3X, c3Y}, 4:{c4X, c4Y}, \ndistance: {d}"
 
 
 # захват видео с камеры и обработка
