@@ -57,10 +57,16 @@ cv.destroyAllWindows()
 
 ret, cameraMatrix, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, frameSize, None, None)
 
+
 # Save the camera calibration result for later use (we won't worry about rvecs / tvecs)
-pickle.dump((cameraMatrix, dist), open( "calibration.pkl", "wb" ))
-pickle.dump(cameraMatrix, open( "cameraMatrix.pkl", "wb" ))
-pickle.dump(dist, open( "dist.pkl", "wb" ))
+pickle.dump((cameraMatrix, dist), open(
+    "cb_params\\calibration.pkl", "wb" ))
+
+pickle.dump(cameraMatrix, open(
+    "\\app\\backend\\src\\detection\\calibration_params\\cameraMatrix.pkl", "wb" ))
+
+pickle.dump(dist, open(
+    "\\app\\backend\\src\\detection\\calibration_params\\dist.pkl", "wb" ))
 
 
 img = cv.imread('cali5.png')
