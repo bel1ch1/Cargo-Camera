@@ -4,17 +4,17 @@ import numpy as np
 
 
 # Подгружаем данные для определения дистанции
-with open('dist.pkl', 'rb') as f:
+with open('calibration_params//dist.pkl', 'rb') as f:
     dist_coef = pickle.load(f)
 
-with open('cameraMatrix.pkl', 'rb') as g:
+with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
 
 
 # Константы
 MARKER_SIZE_M = 0.165 # Размер маркера
 ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50) # набор маркеров
-FRAME_SHAPE = [420, 640]
+FRAME_SHAPE = [640, 480]
 
 # Параметры
 arucoParam = cv2.aruco.DetectorParameters()
