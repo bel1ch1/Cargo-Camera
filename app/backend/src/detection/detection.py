@@ -20,13 +20,13 @@ FRAME_SHAPE = [640, 480]
 arucoParam = cv2.aruco.DetectorParameters()
 
 
-def center_coords(shape = FRAME_SHAPE):
+def center_coords(shape = FRAME_SHAPE) -> list:
     center_X = FRAME_SHAPE[0] / 2
     center_Y = FRAME_SHAPE[1] / 2
     return [center_X, center_Y]
 
 # Поиск позиции
-def pose_esitmation(img: cv2.MatLike, arucoDict, **center):
+def pose_esitmation(img, arucoDict, centerX, centerY):
     """returns coordinates and distance to the object"""
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -44,16 +44,20 @@ def pose_esitmation(img: cv2.MatLike, arucoDict, **center):
         distance_to_marker = np.linalg.norm(tvec)
 
         # координаты и дистанция
-        c1 = corners[0][0][0] - center[0]
-        c2 = corners[0][0][1] - center[0]
-        c3 = corners[0][0][2] - center[0]
-        c4 = corners[0][0][3] - center[0]
+        c1X = corners[0][0][0][0] - centerX
+        c2X = corners[0][0][1][0] - centerX
+        c3X = corners[0][0][2][0] - centerX
+        c4X = corners[0][0][3][0] - centerX
+        c1Y = corners[0][0][0][1] - centerY
+        c2Y = corners[0][0][1][1] - centerY
+        c3Y = corners[0][0][2][1] - centerY
+        c4Y = corners[0][0][3][1] - centerY
         d = distance_to_marker
 
         # Вывод в консоль
-        print(c1, c2, c3, c4, d)
+        print(f"{c1X, c1Y}, {c2X, c2Y}, {c3X, c3Y}, {c4X, c4Y}, \ndistance: {d}")
         # Возврат значений
-        return f"1 {c1[:1]},\n2 {c2[:1]},\n3 {c3[:1]},\n4 {c4[:1]},\ndistance {d}"
+        #return f"1 {c1X[:1]},\n2 {c2X[:1]},\n3 {c3X[:1]},\n4 {c4X[:1]},\ndistance {d}"
 
 
 # захват видео с камеры и обработка
@@ -69,10 +73,10 @@ while True:
     center = center_coords()
 
     # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT, center)
+    output=pose_esitmation(frame, ARUCO_DICT, center[0], center[1])
 
     # Вывод кадров
-    cv2.imshow(output)
+    cv2.imshow("Output", frame)
 
     # Остановка
     k = cv2.waitKey(30) & 0xff
