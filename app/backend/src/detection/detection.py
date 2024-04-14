@@ -1,32 +1,14 @@
 import cv2
-import pickle
 import numpy as np
 
 
-# Подгружаем данные для определения дистанции
-with open('calibration_params//dist.pkl', 'rb') as f:
-    dist_coef = pickle.load(f)
-
-with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
-    cam_mat = pickle.load(g)
-
-
-# Константы
-MARKER_SIZE_M = 0.165 # Размер маркера
-ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50) # набор маркеров
 FRAME_SHAPE = [640, 480]
-
-# Параметры
-arucoParam = cv2.aruco.DetectorParameters()
-
 
 def center_coords(shape = FRAME_SHAPE) -> list:
     """Изменяет точку отсчета координат"""
     center_X = FRAME_SHAPE[0] / 2
     center_Y = FRAME_SHAPE[1] / 2
     return [center_X, center_Y]
-
-
 
 # Поиск позиции
 def pose_esitmation(img, arucoDict, centerX, centerY):
@@ -79,36 +61,6 @@ def calibrate_centered_marker(img, arucoDict, centerX, centerY ) -> list:
         calibrate = True
         return[calibrate, corners]
 
-
 def set_valid_area(valid_area: int ,calibrate_status, **centered_corners: str):
     """У станавливает допустимую область отклонения маркера"""
     pass
-
-
-
-# захват видео с камеры и обработка
-cap = cv2.VideoCapture(0)
-while True:
-
-    success, frame = cap.read()
-
-    if not success:
-        break
-
-    # Получаем центр координат
-    center = center_coords()
-
-    # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT, center[0], center[1])
-
-    # Вывод кадров
-    cv2.imshow("Output", frame)
-
-    # Остановка
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
-
-
-cap.release()
-cv2.destroyAllWindows()
