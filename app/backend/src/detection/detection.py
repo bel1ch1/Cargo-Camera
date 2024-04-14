@@ -63,12 +63,12 @@ def pose_esitmation(img, arucoDict, centerX, centerY):
 
 
 def calibrate_centered_marker(img, arucoDict, centerX, centerY ) -> list:
-    """находит координаты отцентрованного маркера.
+    """Находит координаты отцентрованного маркера.
     Возвращает найденные координаты"""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Ищем маркеры
-    corners, _, _ = cv2.aruco.detectMarkers(gray, arucoDict, parameters=arucoParam)
+    corners, _, _ = cv2.aruco.detectMarkers(gray, arucoDict, parameters=ARUCO_PARAM)
 
     # если нашли
     if corners:
@@ -77,5 +77,5 @@ def calibrate_centered_marker(img, arucoDict, centerX, centerY ) -> list:
 
 
 def set_valid_area(valid_area: int ,calibrate_status, **centered_corners: str):
-    """У станавливает допустимую область отклонения маркера"""
+    """ Устанавливает допустимую область отклонения маркера"""
     pass
