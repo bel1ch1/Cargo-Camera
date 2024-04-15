@@ -1,37 +1,31 @@
 import cv2
-import pickle
 
-from .detection import pose_esitmation, center_coords
-
-
-# Подгружаем данные для определения дистанции
-with open('calibration_params//dist.pkl', 'rb') as f:
-    dist_coef = pickle.load(f)
-
-with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
-    cam_mat = pickle.load(g)
+from .detection import pose_esitmation,\
+    calibrate_centered_marker, set_valid_area
+from .constantes import ARUCO_DICT
 
 
-# Константы
-MARKER_SIZE_M = 0.165 # Размер маркера
-ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50) # набор маркеров
-FRAME_SHAPE = [640, 480]
-
-arucoParam = cv2.aruco.DetectorParameters()
-
+# Инициализируем камеру
 cap = cv2.VideoCapture(0)
-while True:
 
+# Калибруем позицию отсчета координат
+cb_pos = calibrate_centered_marker(cap, ARUCO_DICT)
+
+# Цыкл работы основного модуля
+while cap.isOpened():
+
+    # Читаем кадр с камеры
     success, frame = cap.read()
 
+    # Проверка на принятия кадра
     if not success:
         break
 
-    # Получаем центр координат
-    center = center_coords()
+    # Устанавливаем границы допустимых координат
+    set_valid_area(1, cb_pos[0], cb_pos[1], cb_pos[2])
 
     # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT, center[0], center[1])
+    output=pose_esitmation(frame, ARUCO_DICT)
 
     # Вывод кадров
     cv2.imshow("Output", frame)
