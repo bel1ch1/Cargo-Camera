@@ -11,7 +11,7 @@ with open('calibration_params//dist.pkl', 'rb') as f:
 with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
 
-
+# пока не использовал
 def center_coords() -> list:
     """Изменяет точку отсчета координат"""
     center_X = None
@@ -20,10 +20,10 @@ def center_coords() -> list:
 
 
 # Поиск позиции
-def pose_esitmation(img, arucoDict, centerX, centerY):
-    """Возвращает координаты углов маркера и дистанцию до него"""
+def pose_esitmation(frame, arucoDict, valid_X, valid_Y):
+    """Возвращает значение отклонения от set_valid_area и дистанцию"""
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Ищем маркеры
     corners, _, _ = cv2.aruco.detectMarkers(gray, arucoDict, parameters=ARUCO_PARAM)
@@ -39,17 +39,17 @@ def pose_esitmation(img, arucoDict, centerX, centerY):
         # Определяем дистанцию до маркера
         distance_to_marker = np.linalg.norm(tvec)
 
-        # координаты X
-        c1X = corners[0][0][0][0] - centerX
-        c2X = corners[0][0][1][0] - centerX
-        c3X = corners[0][0][2][0] - centerX
-        c4X = corners[0][0][3][0] - centerX
+        # координаты X c отклонение от допустимого значения
+        c1X = corners[0][0][0][0] - valid_X
+        c2X = corners[0][0][1][0] - valid_X
+        c3X = corners[0][0][2][0] - valid_X
+        c4X = corners[0][0][3][0] - valid_X
 
-        # координаты Y
-        c1Y = corners[0][0][0][1] - centerY
-        c2Y = corners[0][0][1][1] - centerY
-        c3Y = corners[0][0][2][1] - centerY
-        c4Y = corners[0][0][3][1] - centerY
+        # координаты Y c отклонение от допустимого значения
+        c1Y = valid_Y - corners[0][0][0][1]
+        c2Y = valid_Y - corners[0][0][1][1]
+        c3Y = valid_Y - corners[0][0][2][1]
+        c4Y = valid_Y - corners[0][0][3][1]
 
         # дистанция
         d = distance_to_marker
@@ -62,20 +62,42 @@ def pose_esitmation(img, arucoDict, centerX, centerY):
         return f"1:{c1X, c1Y}, 2:{c2X, c2Y}, 3:{c3X, c3Y}, 4:{c4X, c4Y}, \ndistance: {d}"
 
 
-def calibrate_centered_marker(img, arucoDict, centerX, centerY ) -> list:
+# калибровка позици отсчета координат
+def calibrate_centered_marker(cap, arucoDict) -> list:
     """Находит координаты отцентрованного маркера.
     Возвращает найденные координаты"""
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Проверяем, успешно ли открыта веб-камера
+    if not cap.isOpened():
+        return None
+
+    # Захватываем один кадр с веб-камеры
+    ret, frame = cap.read()
+
+    # Проверяем, успешно ли получен кадр
+    if not ret:
+        return None
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Ищем маркеры
     corners, _, _ = cv2.aruco.detectMarkers(gray, arucoDict, parameters=ARUCO_PARAM)
 
     # если нашли
     if corners:
-        calibrate = True
-        return[calibrate, corners]
+        calibrate = True # Статус
+        corner_X = corners[0][0][0][0] # Первый угол по X
+        corner_Y = corners[0][0][0][1] # Первый угол по Y
+
+        return[calibrate, corner_X, corner_Y]
 
 
-def set_valid_area(valid_area: int ,calibrate_status, **centered_corners: str):
+# Установка границ допустимых координат
+def set_valid_area(valid_area_param: int ,calibrate_status, corner_X, corner_Y) -> list:
     """ Устанавливает допустимую область отклонения маркера"""
-    pass
+    if calibrate_status:
+        valid_X = corner_X+valid_area_param
+        valid_Y = corner_Y+valid_area_param
+        return [valid_X, valid_Y]
+    else:
+        return None
