@@ -20,8 +20,10 @@ def center_coords() -> list:
 
 
 # Поиск позиции (Главная)
-def pose_esitmation(frame, arucoDict, valid_X, valid_Y):
-    """Возвращает значение отклонения от set_valid_area и дистанцию"""
+def pose_esitmation(
+        frame, arucoDict, valid_Left_X, valid_Right_X, valid_Left_Y, valid_Right_Y
+    ):
+    """Возвращает значение отклонения от точек set_valid_area и дистанцию"""
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -40,32 +42,29 @@ def pose_esitmation(frame, arucoDict, valid_X, valid_Y):
         distance_to_marker = np.linalg.norm(tvec)
 
         # координаты X c отклонение от допустимого значения
-        c1X = corners[0][0][0][0] - valid_X
-        c2X = corners[0][0][1][0] - valid_X
-        c3X = corners[0][0][2][0] - valid_X
-        c4X = corners[0][0][3][0] - valid_X
+        c1X = corners[0][0][0][0] - valid_Left_X  # отклоненние от левой
+        c3X = corners[0][0][2][0] - valid_Right_X # отклоненние от правой
 
         # координаты Y c отклонение от допустимого значения
-        c1Y = valid_Y - corners[0][0][0][1]
-        c2Y = valid_Y - corners[0][0][1][1]
-        c3Y = valid_Y - corners[0][0][2][1]
-        c4Y = valid_Y - corners[0][0][3][1]
+        c1Y = valid_Left_Y - corners[0][0][0][1]  # отклоненние от верхней
+        c3Y = valid_Right_Y - corners[0][0][2][1] # отклоненние от нижний
 
         # дистанция
         d = distance_to_marker
 
         # Вывод в консоль
         print(
-            f"{c1X, c1Y}, {c2X, c2Y}, {c3X, c3Y}, {c4X, c4Y}, \ndistance: {d}"
-            )
+            f"Left/Up: {c1X, c1Y}, Right/Down: {c3X, c3Y}, \ndistance: {d}"
+        )
         # Возврат значений
-        return f"1:{c1X, c1Y}, 2:{c2X, c2Y}, 3:{c3X, c3Y}, 4:{c4X, c4Y}, \ndistance: {d}"
+        return f"1:{c1X, c1Y}, 3:{c3X, c3Y}, \ndistance: {d}"
 
 
 # калибровка позици отсчета координат (Для set_valid_area)
 def get_centered_marker(cap, arucoDict) -> list:
     """Находит координаты отцентрованного маркера.
-    Возвращает статус получения координат, найденные координаты [cb_status, X, Y]"""
+    Возвращает статус получения координат, найденные координаты:
+    [cb_status, L_X, L_Y, R_X, R_Y]"""
 
     # Проверяем, успешно ли открыта веб-камера
     if not cap.isOpened():
@@ -86,19 +85,24 @@ def get_centered_marker(cap, arucoDict) -> list:
     # если нашли
     if corners:
         cb_status = True # Статус
-        corner_X = corners[0][0][0][0] # Первый угол по X
-        corner_Y = corners[0][0][0][1] # Первый угол по Y
-
-        return[cb_status, corner_X, corner_Y]
+        corner_L_X = corners[0][0][0][0] # Первый угол по X
+        corner_L_Y = corners[0][0][0][1] # Первый угол по Y
+        corner_R_X = corners[0][0][2][0] # Третий угол по X
+        corner_R_Y = corners[0][0][2][1] # Третий угол по Y
+        return[cb_status, corner_L_X, corner_L_Y, corner_R_X, corner_R_Y]
 
 
 # Установка границ допустимых координат (Для главной)
-def set_valid_area(valid_area_param: int ,cb_status, corner_X, corner_Y) -> list:
+def set_valid_area(valid_area_param: int ,cb_status, L_X, L_Y, R_X, R_Y) -> list:
     """ Устанавливает допустимую область отклонения маркера.
-    Возвращает координаты от которых считается отклонение: [valid_X, valid_Y]"""
+    Возвращает координаты от которых считается отклонение:
+    [valid_L_X, valid_L_Y, valid_R_X,  valid_R_Y]"""
+
     if cb_status:
-        valid_X = corner_X - valid_area_param
-        valid_Y = corner_Y - valid_area_param
-        return [valid_X, valid_Y]
+        valid_L_X = L_X - valid_area_param
+        valid_L_Y = L_Y - valid_area_param
+        valid_R_X = R_X + valid_area_param
+        valid_R_Y = R_Y + valid_area_param
+        return [valid_L_X, valid_L_Y, valid_R_X,  valid_R_Y]
     else:
         return None
