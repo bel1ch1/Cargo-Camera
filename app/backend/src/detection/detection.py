@@ -2,7 +2,7 @@ import cv2
 import pickle
 import numpy as np
 
-from .constantes import MARKER_SIZE_M, ARUCO_PARAM
+from constantes import MARKER_SIZE_M, ARUCO_PARAM
 
 # Подгружаем данные для определения дистанции
 with open('calibration_params//dist.pkl', 'rb') as f:
@@ -10,6 +10,7 @@ with open('calibration_params//dist.pkl', 'rb') as f:
 
 with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
+
 
 # пока не использовал
 def center_coords() -> list:
@@ -64,7 +65,7 @@ def pose_esitmation(
 def get_centered_marker(cap, arucoDict) -> list:
     """Находит координаты отцентрованного маркера.
     Возвращает статус получения координат, найденные координаты:
-    [cb_status, L_X, L_Y, R_X, R_Y]"""
+    [cb_status, L_X, R_X, L_Y, R_Y]"""
 
     # Проверяем, успешно ли открыта веб-камера
     if not cap.isOpened():
@@ -89,20 +90,20 @@ def get_centered_marker(cap, arucoDict) -> list:
         corner_L_Y = corners[0][0][0][1] # Первый угол по Y
         corner_R_X = corners[0][0][2][0] # Третий угол по X
         corner_R_Y = corners[0][0][2][1] # Третий угол по Y
-        return[cb_status, corner_L_X, corner_L_Y, corner_R_X, corner_R_Y]
+        return[cb_status, corner_L_X, corner_R_X, corner_L_Y, corner_R_Y]
 
 
 # Установка границ допустимых координат (Для главной)
-def set_valid_area(valid_area_param: int ,cb_status, L_X, L_Y, R_X, R_Y) -> list:
+def set_valid_area(valid_area_param: int ,cb_status, L_X, R_X, L_Y, R_Y) -> list:
     """ Устанавливает допустимую область отклонения маркера.
     Возвращает координаты от которых считается отклонение:
-    [valid_L_X, valid_L_Y, valid_R_X,  valid_R_Y]"""
+    [valid_L_X, valid_R_X, valid_L_Y, valid_R_Y]"""
 
     if cb_status:
         valid_L_X = L_X - valid_area_param
         valid_L_Y = L_Y - valid_area_param
         valid_R_X = R_X + valid_area_param
         valid_R_Y = R_Y + valid_area_param
-        return [valid_L_X, valid_L_Y, valid_R_X,  valid_R_Y]
+        return [valid_L_X, valid_R_X, valid_L_Y, valid_R_Y]
     else:
         return None

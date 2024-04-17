@@ -1,16 +1,19 @@
 import cv2
 
-from .detection import pose_esitmation,\
+from detection import pose_esitmation,\
     get_centered_marker, set_valid_area
-
-from .constantes import ARUCO_DICT
+from constantes import ARUCO_DICT
 
 
 # Инициализируем камеру
 cap = cv2.VideoCapture(0)
 
+
 # Калибруем позицию отсчета координат
-cb_pos = get_centered_marker(cap, ARUCO_DICT)
+cb_pos = []
+while not cb_pos:
+    cb_pos = get_centered_marker(cap, ARUCO_DICT)
+
 
 # Устанавливаем границы допустимых координат
 valid_area = set_valid_area(1, cb_pos[0], cb_pos[1], cb_pos[2], cb_pos[3], cb_pos[4])
@@ -27,7 +30,7 @@ while cap.isOpened():
         break
 
     # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT)
+    output=pose_esitmation(frame, ARUCO_DICT, valid_area[0], valid_area[1], valid_area[2], valid_area[3])
 
     # Вывод кадров
     cv2.imshow("Output", frame)
