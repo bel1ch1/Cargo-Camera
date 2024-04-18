@@ -24,7 +24,7 @@ cv2.destroyAllWindows()
 
 
 # Устанавливаем границы допустимых координат
-valid_area = set_valid_area(1, cb_pos[0], cb_pos[1], cb_pos[2], cb_pos[3], cb_pos[4])
+valid_area = set_valid_area(10, cb_pos[0], cb_pos[1], cb_pos[2], cb_pos[3], cb_pos[4])
 
 
 # Цыкл работы основного модуля
