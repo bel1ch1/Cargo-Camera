@@ -12,7 +12,15 @@ cap = cv2.VideoCapture(0)
 # Калибруем позицию отсчета координат
 cb_pos = []
 while not cb_pos:
-    cb_pos = get_centered_marker(cap, ARUCO_DICT)
+    ret, frame= cap.read()
+    if ret:
+        cv2.imshow('cb', frame)
+        k = cv2.waitKey(10) & 0xff
+        if k == ord('s'):
+            cb_pos = get_centered_marker(cap, ARUCO_DICT)
+    else:
+        break
+cv2.destroyAllWindows()
 
 
 # Устанавливаем границы допустимых координат
