@@ -42,20 +42,32 @@ def pose_esitmation(
         # Определяем дистанцию до маркера
         distance_to_marker = np.linalg.norm(tvec)
 
-        # координаты X c отклонение от допустимого значения
-        c1X = corners[0][0][0][0] - valid_Left_X  # отклоненние от левой
-        c3X = corners[0][0][2][0] - valid_Right_X # отклоненние от правой
 
-        # координаты Y c отклонение от допустимого значения
-        c1Y = valid_Left_Y - corners[0][0][0][1]  # отклоненние от верхней
-        c3Y = valid_Right_Y - corners[0][0][2][1] # отклоненние от нижний
-
+        # координаты маркера по X
+        c1X = corners[0][0][0][0]# - valid_Left_X  # отклоненние от левой
+        c3X = corners[0][0][2][0]# - valid_Right_X # отклоненние от правой
+        # координаты маркера по Y
+        c1Y = corners[0][0][0][1]  # отклоненние от верхней
+        c3Y = corners[0][0][2][1] # отклоненние от нижний
         # дистанция
         d = distance_to_marker
 
+        # Допустимая зона
+        if valid_Left_X <= c1X and c3X <= valid_Right_X:
+            x_coords = "in an valid area"
+        if valid_Left_Y <= c1Y and c3Y <= valid_Right_Y:
+            y_coords  = "in an valid area"
+
+        # Другие случаи
+        if c1X < valid_Left_X or c3X > valid_Right_X:
+            x_coords = "not in an valid area"
+        if c1Y < valid_Left_Y or c3Y > valid_Right_Y:
+            y_coords = "not in an valid area"
+
+
         # Вывод в консоль
         print(
-            f"Left/Up: {c1X, c1Y}, Right/Down: {c3X, c3Y}, \ndistance: {d}"
+            f"X: {x_coords}, Y: {y_coords}, \ndistance: {d}"
         )
         # Возврат значений
         return f"1:{c1X, c1Y}, 3:{c3X, c3Y}, \ndistance: {d}"
