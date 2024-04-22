@@ -35,12 +35,13 @@ def pose_esitmation(
     if corners:
 
         # Определяем сдвиг
-        _ , tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
+        rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
             corners, MARKER_SIZE_M, cam_mat, dist_coef
         )
 
         # Определяем дистанцию до маркера
         distance_to_marker = np.linalg.norm(tvec)
+
 
 
         # координаты маркера по X
@@ -51,6 +52,9 @@ def pose_esitmation(
         c3Y = corners[0][0][2][1] # отклоненние от нижний
         # дистанция
         d = distance_to_marker
+
+
+        cv2.drawFrameAxes(frame, cam_mat, dist_coef, rvec, tvec, 0.1, 4)
 
         # Допустимая зона
         if valid_Left_X <= c1X and c3X <= valid_Right_X:
