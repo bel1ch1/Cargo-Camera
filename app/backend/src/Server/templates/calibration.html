@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration</title>
+</head>
+<body>
+    <h1>Video Stream</h1>
+    <div id="video-container">
+        <img id="video-frame" src="" alt="Video Frame">
+    </div>
+
+    <script>
+        // Функция для загрузки кадров из потока
+        async function loadVideo() {
+            const videoElement = document.getElementById('video-frame');
+
+            try {
+                const response = await fetch('/calibration'); // Запрос на получение видеопотока
+                const reader = response.body.getReader();
+
+                // Функция для чтения и отображения кадров
+                async function readStream() {
+                    while (true) {
+                        const { done, value } = await reader.read(); // Чтение кадра из потока
+                        if (done) break;
+
+                        // Конвертация полученных байтов в изображение
+                        const blob = new Blob([value]);
+                        const imageUrl = URL.createObjectURL(blob);
+
+                        // Обновление изображения на странице
+                        videoElement.src = imageUrl;
+                    }
+                }
+
+                readStream(); // Начать чтение потока
+            } catch (error) {
+                console.error('Error fetching video stream:', error);
+            }
+        }
+
+        loadVideo(); // Загрузить видеопоток при загрузке страницы
+    </script>
+</body>
+</html>
