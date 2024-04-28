@@ -31,8 +31,17 @@
 </head>
 <body>
     <h1>Управление краном</h1>
-    <button class="button" onclick="location.href='{{ url_for('calibration_frames') }}';">Start Calibration</button>
-    <button class="button">Button 2</button>
-    <button class="button">Button 3</button>
+    <button class="button" onclick="location.href='{{ url_for('calibration') }}';">Start Calibration</button>
+    <button class="button" onclick="send_start()">Запуск<button>
+    <button class="button" onclick="">Остановка</button>
+    <script>
+    function send_start() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/start_detection", true);
+    }
+    function send_stop() {
+        window.location = ""
+    }
+    </script>
 </body>
 </html>
