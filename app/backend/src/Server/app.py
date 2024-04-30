@@ -23,7 +23,7 @@ async def index(request: Request):
 async def start_detection_app(request: Request):
     """Отвечает на запросс для старта приложения детекции"""
     request = {"status": "True"}
-    return request
+    return request, RedirectResponse("/")
 
 
 # Калибровка позиции для пользователя
