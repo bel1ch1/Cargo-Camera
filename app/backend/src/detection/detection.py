@@ -54,7 +54,7 @@ def pose_esitmation(
         d = distance_to_marker
 
 
-        cv2.drawFrameAxes(frame, cam_mat, dist_coef, rvec, tvec, 0.1, 4)
+        #cv2.drawFrameAxes(frame, cam_mat, dist_coef, rvec, tvec, 0.1, 4)
 
         # Допустимая зона
         if valid_Left_X <= c1X and c3X <= valid_Right_X:
