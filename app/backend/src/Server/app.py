@@ -10,7 +10,7 @@ import cv2
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-
+camera = cv2.VideoCapture(0)
 
 # Рендер стартовой страницы
 @app.get('/', response_class=HTMLResponse)
@@ -38,8 +38,8 @@ def calibration(request: Request):
 async def get_stream(websocket: WebSocket):
     await websocket.accept()
     try:
-        camera = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-        while True:
+        
+        while camera.isOpened():
             success, frame = camera.read()
             if not success:
                 break
@@ -49,10 +49,10 @@ async def get_stream(websocket: WebSocket):
             await asyncio.sleep(0.03)
     except (WebSocketDisconnect, ConnectionClosed):
         print("Client disconnected")
-        camera.release()
-    finally:
-        await websocket.close()
-        RedirectResponse("/")
+        #camera.release()
+    #finally:
+        #await websocket.close()
+
 
 # Точка входа
 if __name__ == '__main__':
