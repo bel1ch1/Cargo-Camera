@@ -26,11 +26,6 @@ async def start_detection_app(request: Request):
     return request
 
 
-@app.get('/plug')
-def plug(request: Request):
-    return templates.TemplateResponse("plug.html", {"request": request})
-
-
 # Калибровка позиции для пользователя
 @app.get('/calibration')
 def calibration(request: Request):
