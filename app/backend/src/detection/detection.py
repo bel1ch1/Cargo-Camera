@@ -2,7 +2,12 @@ import cv2
 import pickle
 import numpy as np
 
-from constantes import MARKER_SIZE_M, ARUCO_PARAM
+from constantes import ARUCO_PARAM
+
+
+MARKER_SIZE_M = 0.165
+marcer_size_M = 0.165
+
 
 # Подгружаем данные для определения дистанции
 with open('calibration_params//dist.pkl', 'rb') as f:
@@ -10,14 +15,6 @@ with open('calibration_params//dist.pkl', 'rb') as f:
 
 with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
-
-
-# пока не использовал
-def center_coords() -> list:
-    """Изменяет точку отсчета координат"""
-    center_X = None
-    center_Y = None
-    return [center_X, center_Y]
 
 
 # Поиск позиции (Главная)
@@ -121,5 +118,28 @@ def set_valid_area(valid_area_param: int ,cb_status, L_X, R_X, L_Y, R_Y) -> list
         valid_R_X = R_X + valid_area_param
         valid_R_Y = R_Y + valid_area_param
         return [valid_L_X, valid_R_X, valid_L_Y, valid_R_Y]
+    else:
+        return None
+
+
+def pose_of_container(frame, ARUCO_DICT, ARUCO_PARAM, marker_size_M):
+    """Возваращает отклонение контейнера от центра (X, Y, Distance)"""
+    # Серый трешхолд для матрицы кадра
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Нахождение маркера
+    corners, _, _ = cv2.aruco.detectMarkers(gray, ARUCO_DICT, ARUCO_PARAM)
+    if corners:
+        # Вектора положения
+        _, tvec = cv2.aruco.estimatePoseSingleMarkers(
+            corners, marker_size_M, cam_mat, dist_coef
+        )
+
+        # Отколонение от центра по X
+        X_coord = tvec[0][0][0]
+        # Отколонение от центра по Y
+        Y_xoord = tvec[0][0][1]
+        # Дистанция от камеры до маркера
+        distance_to_marker = tvec[0][0][2]
+        return X_coord, Y_xoord, distance_to_marker
     else:
         return None
