@@ -122,7 +122,7 @@ def set_valid_area(valid_area_param: int ,cb_status, L_X, R_X, L_Y, R_Y) -> list
         return None
 
 
-def pose_of_container(frame, ARUCO_DICT, ARUCO_PARAM, marker_size_M):
+def pose_of_container(frame, marker_size_M, ARUCO_DICT, ARUCO_PARAM):
     """Возваращает отклонение контейнера от центра (X, Y, Distance)"""
     # Серый трешхолд для матрицы кадра
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
