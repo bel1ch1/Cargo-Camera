@@ -32,7 +32,7 @@ def pose_esitmation(
     if corners:
 
         # Определяем сдвиг
-        rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
+        _, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
             corners, MARKER_SIZE_M, cam_mat, dist_coef
         )
 
