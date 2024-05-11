@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        /* Пример простого CSS для стилизации кнопок */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50; /* Зеленый цвет */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        .button:hover {
+            background-color: #45a049; /* Темно-зеленый цвет при наведении */
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings</h1>
+    <form title="Set new marker size" id="set_size_form">
+        <input  type="number" name="size" placeholder="Enter marker size">
+        <button type="submit" class="button" onclick="">Submit</button>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем форму по её ID
+            var size_form = document.getElementById('set_size_form');
+
+            // Добавляем обработчик события отправки формы
+            size_form.addEventListener('submit', function(event) {
+                // Предотвращаем стандартное поведение формы
+                event.preventDefault();
+
+                // Получаем значение из поля ввода
+                var size = size_form.size.value;
+
+                // Создаем объект XMLHttpRequest
+                var xhr = new XMLHttpRequest();
+
+                // Отправляем запрос к API
+                xhr.open('POST', '/set_marker_size?size=' + encodeURIComponent(size), true);
+
+                // Добавляем обработчик события на успешное завершение запроса
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        // Выводим ответ от сервера
+                        console.log(xhr.responseText);
+                    } else {
+                        // Обработка ошибок
+                        console.error('Request failed');
+                    }
+                };
+
+                // Отправляем запрос
+                xhr.send();
+            });
+        });
+    </script>
+</body>
+</html>
