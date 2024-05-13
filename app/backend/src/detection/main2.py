@@ -1,14 +1,20 @@
 import threading
+import asyncio
 
 import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, WebSocketDisconnect, WebSocket
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from websockets.exceptions import ConnectionClosed
 
-from cv2 import VideoCapture, destroyAllWindows
+from cv2 import VideoCapture, destroyAllWindows, imencode
+from cv2.aruco import DetectorParameters, getPredefinedDictionary, DICT_4X4_50
 
-from constantes import ARUCO_DICT, ARUCO_PARAM
+#from constantes import ARUCO_DICT, ARUCO_PARAM
 from detection import pose_of_container
+
+ARUCO_PARAM = DetectorParameters()
+ARUCO_DICT = getPredefinedDictionary(DICT_4X4_50)
 
 cap = VideoCapture(0)
 
@@ -21,7 +27,7 @@ def detection():
         ret, frame = cap.read()
 
         if ret:
-            output = pose_of_container(frame, ARUCO_DICT, ARUCO_PARAM, marker_size_M)
+            output = pose_of_container(frame, marker_size_M, ARUCO_DICT, ARUCO_PARAM)
             if output != None:
                 print(f"X : {output[0]}, Y : {output[1]}, distance: {output[2]}")
             else:
@@ -53,6 +59,28 @@ async def set_new_marker_size(size: float):
     global marker_size
     marker_size = size
     return {'message' : 'Marker size is updated'}
+
+
+# @app.websocket("/ws")
+# async def video_feed(websocket: WebSocket):
+#     """
+#     Обработчик WebSocket, который отправляет кадры c камеры.
+#     """
+#     await websocket.accept()
+#     try:
+#         while True:
+#             success, frame = cap.read()
+#             if not success:
+#                 break
+#             else:
+#                 _, buffer = imencode('.jpg', frame)
+#                 await websocket.send_bytes(buffer.tobytes())
+#             await asyncio.sleep(0.05)  # Задержка для снижения нагрузки на сервер
+#     except (WebSocketDisconnect, ConnectionClosed):
+#         print('disconnected')
+#     finally:
+#         cap.release()
+#         RedirectResponse("/")
 
 
 def run_api():

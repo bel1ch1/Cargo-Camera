@@ -38,9 +38,9 @@ def calibration(request: Request):
 async def get_stream(websocket: WebSocket):
     await websocket.accept()
     try:
-        camera = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(0)
         while True:
-            success, frame = camera.read()
+            success, frame = cap.read()
             if not success:
                 break
             else:
@@ -49,9 +49,8 @@ async def get_stream(websocket: WebSocket):
             await asyncio.sleep(0.03)
     except (WebSocketDisconnect, ConnectionClosed):
         print("Client disconnected")
-        camera.release()
     finally:
-        await websocket.close()
+        cap.release()
         RedirectResponse("/")
 
 # Точка входа
