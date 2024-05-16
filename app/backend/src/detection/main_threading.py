@@ -9,19 +9,28 @@ from fastapi.templating import Jinja2Templates
 from websockets.exceptions import ConnectionClosed
 
 
+####################### PARSING ######################################################
 # Подгружаем данные для определения дистанции
 with open('calibration_params//dist.pkl', 'rb') as f:
     dist_coef = pickle.load(f)
 
 with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
+######################################################################################
 
+
+####################### VAR ##########################################################
 marker_size_M = 0.165
+######################################################################################
 
+
+####################### CONSTS #######################################################
 ARUCO_PARAM = cv2.aruco.DetectorParameters()
 ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+######################################################################################
 
 
+####################### DETECTION FUNC ###############################################
 def pose_of_container(frame, marker_size_M, ARUCO_DICT=ARUCO_DICT, ARUCO_PARAM=ARUCO_PARAM):
     """Возваращает отклонение контейнера от центра (X, Y, Distance)"""
     # Серый трешхолд для матрицы кадра
@@ -43,7 +52,7 @@ def pose_of_container(frame, marker_size_M, ARUCO_DICT=ARUCO_DICT, ARUCO_PARAM=A
         return X_coord, Y_xoord, distance_to_marker
     else:
         return None
-
+######################################################################################
 
 
 
@@ -52,6 +61,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 
+# Отправляем в браузер HTML
 @app.get('/', response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -97,10 +107,11 @@ def run_api():
 
 ####################### THREAD - DETECTION ###########################################
 def detection():
+    # Ининциализируем камеру
     cap = cv2.VideoCapture(0)
     while True:
         ret, frame = cap.read()
-
+        # Если получили камеру
         if ret:
             output = pose_of_container(frame, marker_size_M)
             if output != None:
@@ -115,7 +126,7 @@ def detection():
         k = cv2.waitKey(30) & 0xff
         if k == 27:
             break
-
+    # Чистим ресуры
     cap.release()
     cv2.destroyAllWindows()
 ######################################################################################
