@@ -1,54 +1,99 @@
+import threading
 import cv2
+import pickle
+import uvicorn
 
-from detection import pose_esitmation,\
-    get_centered_marker, set_valid_area
-from constantes import ARUCO_DICT
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-
-# Инициализируем камеру
-cap = cv2.VideoCapture(0)
-
-
-# Калибруем позицию отсчета координат
-cb_pos = []
-while not cb_pos:
-    ret, frame= cap.read()
-    if ret:
-        #cv2.imshow('cb', frame)
-        k = cv2.waitKey(10) & 0xff
-        if k == ord('s'):
-            cb_pos = get_centered_marker(cap, ARUCO_DICT)
-    else:
-        break
+from detection import pose_of_container
 
 
+####################### PARSING ######################################################
+# Подгружаем данные для определения дистанции
+with open('calibration_params//dist.pkl', 'rb') as f:
+    dist_coef = pickle.load(f)
 
-# Устанавливаем границы допустимых координат
-valid_area = set_valid_area(10, cb_pos[0], cb_pos[1], cb_pos[2], cb_pos[3], cb_pos[4])
-
-
-# Цыкл работы основного модуля
-while cap.isOpened():
-
-    # Читаем кадр с камеры
-    success, frame = cap.read()
-
-    # Проверка на принятия кадра
-    if not success:
-        break
-
-    # Вывод координат и дистанции
-    output=pose_esitmation(frame, ARUCO_DICT, valid_area[0], valid_area[1], valid_area[2], valid_area[3])
-
-    # Вывод кадров
-    #cv2.imshow("output", frame)
+with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
+    cam_mat = pickle.load(g)
+######################################################################################
 
 
-    # Остановка
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
+####################### VAR ##########################################################
+marker_size_M = 0.165
+######################################################################################
 
 
-cap.release()
-cv2.destroyAllWindows()
+
+
+
+####################### THREAD - API #################################################
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
+
+# Отправляем в браузер HTML
+@app.get('/', response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# Метод меняющий переменную размера маркера
+@app.post('/set_marker_size')
+async def set_new_marker_size(size: float):
+    global marker_size_M
+    marker_size_M = size
+    return {'message' : 'Marker size is updated'}
+
+
+def run_api():
+    uvicorn.run(app, host='127.0.0.1', port=8000)
+######################################################################################
+
+
+
+
+
+####################### THREAD - DETECTION ###########################################
+def detection():
+    # Ининциализируем камеру
+    cap = cv2.VideoCapture(0)
+    while True:
+        ret, frame = cap.read()
+        # Если получили камеру
+        if ret:
+            output = pose_of_container(frame, marker_size_M)
+            if output != None:
+                print(f"X : {output[0]}, Y : {output[1]}, distance: {output[2]}")
+            else:
+                print("Not found")
+        else:
+            print("Camera not found")
+            break
+
+        # Остановка
+        k = cv2.waitKey(30) & 0xff
+        if k == 27:
+            break
+    # Чистим ресуры
+    cap.release()
+    cv2.destroyAllWindows()
+######################################################################################
+
+
+
+
+
+####################### ENTRY POINT ##################################################
+if __name__ == '__main__':
+    #  Multi threading
+    frame_processing_thread = threading.Thread(target=detection)
+    fastapi_thread = threading.Thread(target=run_api)
+
+    fastapi_thread.start()
+    frame_processing_thread.start()
+
+    fastapi_thread.join()
+    frame_processing_thread.join()
+######################################################################################
