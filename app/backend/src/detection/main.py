@@ -1,11 +1,12 @@
 import threading
-import cv2
 import pickle
 import uvicorn
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+
+from cv2 import VideoCapture, waitKey, destroyAllWindows
 
 from detection import pose_of_container
 
@@ -58,7 +59,7 @@ def run_api():
 ####################### THREAD - DETECTION ###########################################
 def detection():
     # Ининциализируем камеру
-    cap = cv2.VideoCapture(0)
+    cap = VideoCapture(0)
     while True:
         ret, frame = cap.read()
         # Если получили камеру
@@ -73,12 +74,12 @@ def detection():
             break
 
         # Остановка
-        k = cv2.waitKey(30) & 0xff
+        k = waitKey(30) & 0xff
         if k == 27:
             break
     # Чистим ресуры
     cap.release()
-    cv2.destroyAllWindows()
+    destroyAllWindows()
 ######################################################################################
 
 

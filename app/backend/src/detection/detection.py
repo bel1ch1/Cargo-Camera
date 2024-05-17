@@ -1,6 +1,8 @@
-import cv2
 import pickle
 
+from cv2 import cvtColor, COLOR_BGR2GRAY
+from cv2.aruco import DetectorParameters, getPredefinedDictionary, detectMarkers,\
+    estimatePoseSingleMarkers, DICT_4X4_50
 
 marcer_size_M = 0.165
 
@@ -13,19 +15,19 @@ with open('calibration_params//cameraMatrix.pkl', 'rb') as g:
     cam_mat = pickle.load(g)
 
 
-ARUCO_PARAM = cv2.aruco.DetectorParameters()
-ARUCO_DICT = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+ARUCO_PARAM = DetectorParameters()
+ARUCO_DICT = getPredefinedDictionary(DICT_4X4_50)
 
 
 def pose_of_container(frame, marker_size_M, ARUCO_DICT=ARUCO_DICT, ARUCO_PARAM=ARUCO_PARAM):
     """Возваращает отклонение контейнера от центра (X, Y, Distance)"""
     # Серый трешхолд для матрицы кадра
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cvtColor(frame, COLOR_BGR2GRAY)
     # Нахождение маркера
-    corners, _, _ = cv2.aruco.detectMarkers(gray, dictionary=ARUCO_DICT, parameters=ARUCO_PARAM)
+    corners, _, _ = detectMarkers(gray, dictionary=ARUCO_DICT, parameters=ARUCO_PARAM)
     if corners:
         # Вектора положения
-        _, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(
+        _, tvec, _ = estimatePoseSingleMarkers(
             corners, markerLength=(marker_size_M/1000), cameraMatrix=cam_mat, distCoeffs=dist_coef
         )
 
