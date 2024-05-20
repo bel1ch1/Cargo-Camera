@@ -3,14 +3,14 @@ import pickle
 import uvicorn
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 from cv2 import VideoCapture, waitKey, destroyAllWindows
 
 from detection import pose_of_container
 
-
+import cv2
 ####################### PARSING ######################################################
 # Подгружаем данные для определения дистанции
 with open('calibration_params//dist.pkl', 'rb') as f:
@@ -46,6 +46,30 @@ async def set_new_marker_size(size: float):
     global marker_size_M
     marker_size_M = size
     return {'message' : 'Marker size is updated'}
+
+
+# Функция генератор для отправки видео потока (байтов)
+def generate_frames(cap):
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+
+        yield (
+            b'--frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n' + frame.tobytes() + b'\r\n'
+        )
+
+
+@app.get("/video_feed")
+async def video_feed():
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        return {"error": "Could not open video file"}
+
+    frame_generator = generate_frames(cap)
+
+    return StreamingResponse(frame_generator, media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 def run_api():
