@@ -27,7 +27,7 @@ def calibration(request: Request):
 async def get_stream(websocket: WebSocket):
     await websocket.accept()
     try:
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture("nvarguscamerasrc ! nvvidconv ! video/x-raw, format=BGRx' ! videoconvert ! video/x-raw, format=BGR ! appsink", cv2.CAP_GSTREAMER)
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -44,4 +44,4 @@ async def get_stream(websocket: WebSocket):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8000)
+    uvicorn.run(app, host='10.131.121.22', port=8000)
