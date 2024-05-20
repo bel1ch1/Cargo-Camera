@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Live Streaming</title>
+        <style>
+            /* Пример простого CSS для стилизации кнопок */
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+            }
+            .button {
+                display: inline-block;
+                background-color: #4CAF50; /* Зеленый цвет */
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 10px;
+            }
+            .button:hover {
+                background-color: #45a049; /* Темно-зеленый цвет при наведении */
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <img id="frame" src="">
+        </div>
+        <button class="button" id="disconnect-button" onclick="disconnect()">Disconnect</button>
+
+        <script>
+            let ws = new WebSocket("ws://127.0.0.1:8000/ws");
+            let image = document.getElementById("frame");
+            image.onload = function(){
+                URL.revokeObjectURL(this.src); // release the blob URL once the image is loaded
+            }
+            ws.onmessage = function(event) {
+                image.src = URL.createObjectURL(event.data);
+            };
+            function disconnect() {
+                ws.close();
+                window.location.replace('/')
+            }
+        </script>
+    </body>
+</html>
